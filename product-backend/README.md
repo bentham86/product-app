@@ -44,6 +44,12 @@ API REST para gestión de productos (CRUD con búsqueda, filtrado y paginación)
    docker compose run --rm app bundle exec rspec
    ```
 
+## Documentación de API (OpenAPI / Swagger UI)
+
+- **Swagger UI:** http://localhost:3000/api-docs (con la app levantada).
+- **Spec OpenAPI:** `doc/openapi.yaml` (fuente de verdad); servido en `/api-docs/openapi.yaml`.
+- Spec de implementación: `docs/spec-API-Documentation-OpenAPI.md` (en la raíz del repo).
+
 ## Endpoints
 
 | Método | Ruta | Descripción |

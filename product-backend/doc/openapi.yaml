@@ -1,0 +1,280 @@
+openapi: 3.0.3
+info:
+  title: Product API
+  description: API REST de gestión de productos (product-backend). CRUD con búsqueda, filtrado y paginación.
+  version: "1.0"
+
+servers:
+  - url: http://localhost:3000
+    description: Desarrollo local / Docker
+
+paths:
+  /api/v1/products:
+    get:
+      summary: Listar productos
+      description: Listado paginado con búsqueda por nombre y filtro por estado activo.
+      operationId: listProducts
+      parameters:
+        - name: q
+          in: query
+          description: Búsqueda por nombre (ILIKE)
+          required: false
+          schema:
+            type: string
+        - name: active
+          in: query
+          description: Filtrar por estado activo
+          required: false
+          schema:
+            type: boolean
+        - name: page
+          in: query
+          description: Número de página
+          required: false
+          schema:
+            type: integer
+            default: 1
+            minimum: 1
+        - name: per_page
+          in: query
+          description: Ítems por página (máx 100)
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: Lista paginada de productos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListResponse"
+    post:
+      summary: Crear producto
+      description: Crea un nuevo producto. Lógica vía Interactor (Products::Create).
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "201":
+          description: Producto creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "422":
+          description: Errores de validación
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+
+  /api/v1/products/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID del producto
+        schema:
+          type: integer
+    get:
+      summary: Obtener producto por ID
+      description: Detalle de un producto.
+      operationId: getProduct
+      responses:
+        "200":
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "404":
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      summary: Actualizar producto
+      description: Actualización parcial o total por ID.
+      operationId: updateProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductInput"
+      responses:
+        "200":
+          description: Producto actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductResponse"
+        "404":
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Errores de validación
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+    delete:
+      summary: Eliminar producto
+      description: Elimina un producto por ID.
+      operationId: deleteProduct
+      responses:
+        "204":
+          description: Sin contenido (eliminado)
+        "404":
+          description: Producto no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    Product:
+      type: object
+      description: Recurso producto (vista detalle)
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        price:
+          type: string
+          description: Precio con dos decimales (ej. "19.99")
+        stock:
+          type: integer
+        sku:
+          type: string
+        active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProductList:
+      type: object
+      description: Ítem de producto en listado (vista list)
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        price:
+          type: string
+        sku:
+          type: string
+        active:
+          type: boolean
+
+    ProductResponse:
+      type: object
+      properties:
+        data:
+          $ref: "#/components/schemas/Product"
+
+    ProductListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductList"
+        meta:
+          $ref: "#/components/schemas/PaginationMeta"
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+        per_page:
+          type: integer
+        total_pages:
+          type: integer
+        total_count:
+          type: integer
+
+    ProductInput:
+      type: object
+      required:
+        - name
+        - price
+        - stock
+        - sku
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 100
+        description:
+          type: string
+          maxLength: 1000
+        price:
+          type: number
+          exclusiveMinimum: 0
+        stock:
+          type: integer
+          minimum: 0
+        sku:
+          type: string
+          pattern: "^[A-Z0-9]+$"
+          description: Alfanumérico mayúsculas
+        active:
+          type: boolean
+          default: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: not_found
+            message:
+              type: string
+              example: Product not found
+
+    ValidationErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: validation_error
+            message:
+              type: string
+              example: Validation failed
+            details:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+              example:
+                name: ["can't be blank"]
+                sku: ["has already been taken"]

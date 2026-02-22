@@ -15,4 +15,4 @@ docker compose build
 docker compose up
 ```
 
-API en http://localhost:3000. Endpoints bajo `/api/v1/products`.
+API en http://localhost:3000. Endpoints bajo `/api/v1/products`. Documentación interactiva (Swagger UI) en http://localhost:3000/api-docs.

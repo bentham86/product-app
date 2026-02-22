@@ -1,4 +1,4 @@
-# Especificación de Software Detallada (SDD)
+# Especificación de Software Detallada
 # product-backend — Versión 2
 ## Enfoque: Spec Driven Development (SDD)
 
@@ -368,7 +368,7 @@ Si se implementa **ErrorBlueprint**, este mismo formato puede generarse con `Err
 
 ---
 
-## 12. Resumen de Tareas del SSD (v2)
+## 12. Resumen de Tareas
 
 | # | Tarea |
 |---|--------|
