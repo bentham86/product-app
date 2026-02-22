@@ -1,10 +1,9 @@
 # Especificación de Software Detallada
-# product-frontend
+## Enfoque: Spec Driven Development (SDD)
 
 **Versión:** 1.1  
 **Fecha:** 2025-02-22  
-**Rol:** Senior Frontend Developer / Arquitecto de Software  
-**Enfoque:** Mantenibilidad, código limpio y alineación con API existente (product-backend).
+**Rol:** Senior Frontend Developer / Arquitecto de Software
 
 ---
 
@@ -385,5 +384,3 @@ product-frontend/
 - **TailwindCSS:** https://tailwindcss.com/docs.
 
 ---
-
-*Documento listo para usar como especificación (SDD) del frontend de productos (product-frontend).*
