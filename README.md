@@ -22,9 +22,9 @@ API en http://localhost:3000. Endpoints bajo `/api/v1/products`. Documentación 
 
 ```bash
 cd product-frontend
-npm install
+pnpm install
 cp .env.local.example .env.local
-npm dev
+pnpm dev
 ```
 
 App en http://localhost:3000. Sin `NEXT_PUBLIC_API_BASE_URL` arranca en modo mock; para conectar al backend local suele usarse `http://localhost:3001` (o el puerto del backend).

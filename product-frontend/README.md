@@ -12,11 +12,11 @@ Panel de administración de productos (CRUD con búsqueda, filtrado y paginació
 
 ## Guía de configuración (local)
 
-1. **Requisitos:** Node.js >= 18.18, npm (o npm/yarn).
+1. **Requisitos:** Node.js >= 18.18, pnpm (o npm/yarn).
 
 2. **Instalar dependencias:**
    ```bash
-   npm install
+   pnpm install
    ```
 
 3. **Variables de entorno:** Copiar el ejemplo y ajustar si usas backend real:
@@ -27,15 +27,13 @@ Panel de administración de productos (CRUD con búsqueda, filtrado y paginació
 
 4. **Levantar desarrollo:**
    ```bash
-   npm dev
+   pnpm dev
    ```
    App en **http://localhost:3000**.
 
-5. **Tests:**
-   ```bash
-   npm test
-   ```
-   Watch: `npm test:watch`.
+5. **Tests:** `pnpm test` (watch: `pnpm run test:watch`).
+
+6. **Lint:** `pnpm run lint`. Auto-fix: `pnpm run lint:fix`.
 
 ## Variables de entorno
 
