@@ -36,7 +36,7 @@ gem "image_processing", "~> 1.2"
 gem "rack-cors"
 # Spec: interactor, pagy, blueprinter
 gem "interactor"
-gem "pagy", "~> 8.0"
+gem "pagy", "~> 43.3"
 gem "blueprinter"
 
 # Trazabilidad de cambios (auditoría)
