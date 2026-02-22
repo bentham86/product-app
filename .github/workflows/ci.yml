@@ -24,7 +24,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version-file: product-backend/.ruby-version
+          working-directory: product-backend
           bundler-cache: true
 
       - name: RuboCop
@@ -56,7 +56,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version-file: product-backend/.ruby-version
+          working-directory: product-backend
           bundler-cache: true
 
       - name: Setup DB and run tests
@@ -82,7 +82,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version-file: product-backend/.ruby-version
+          working-directory: product-backend
           bundler-cache: true
 
       - name: Brakeman
