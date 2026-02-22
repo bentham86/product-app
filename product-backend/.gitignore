@@ -1,0 +1,39 @@
+# Logs and temp
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+
+# Sensible: no subir la llave de credentials
+/config/master.key
+
+# Storage (archivos subidos en desarrollo)
+/storage/*
+!/storage/.keep
+
+# Entorno local (secretos, URLs)
+.env
+.env.*
+!.env.example
+
+# Bundle (opcional: en Docker no se usa vendor/bundle)
+/vendor/bundle/
+
+# SQLite si se usara
+*.sqlite3
+*.sqlite3-*
+
+# Byebug / debugging
+.byebug_history
+
+# IDE / OS
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# Caché de Bootsnap (se regenera)
+/tmp/cache/
+
+# Cobertura de tests (si se usa)
+/coverage/
