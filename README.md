@@ -11,6 +11,15 @@ Repositorio del proyecto **product-app**: aplicación de gestión de productos (
 
 Juntos forman un flujo completo: el frontend llama al backend en `/api/v1/products`; la documentación de la API está en el backend y las especificaciones de diseño en `docs/` (SDD backend, frontend y API).
 
+## CI/CD
+
+En cada **push** y **pull request** a `main` se ejecuta un pipeline en GitHub Actions (`.github/workflows/ci.yml`):
+
+- **Backend:** lint (RuboCop), tests (RSpec + PostgreSQL), seguridad (Brakeman, bundler-audit).
+- **Frontend:** lint (ESLint), tests (Jest), build (Next.js).
+
+Los jobs se ejecutan en paralelo. El build del frontend solo corre si lint y tests del frontend pasan.
+
 ## Estructura
 
 - **`docs/`** — Documentación y especificaciones (SDD).

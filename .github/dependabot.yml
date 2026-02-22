@@ -1,0 +1,23 @@
+# Dependabot: actualizaciones de dependencias (monorepo)
+version: 2
+updates:
+  # Backend (Ruby/Bundler)
+  - package-ecosystem: bundler
+    directory: "/product-backend"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Frontend (pnpm usa ecosystem npm)
+  - package-ecosystem: npm
+    directory: "/product-frontend"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # GitHub Actions (workflows en la raíz)
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
