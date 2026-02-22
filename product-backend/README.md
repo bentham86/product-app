@@ -23,10 +23,6 @@ API REST para gestión de productos (CRUD con búsqueda, filtrado y paginación)
    ```bash
    docker compose run --rm app bundle exec rails db:create db:migrate
    ```
-   Para test:
-   ```bash
-   docker compose run --rm app bundle exec rails db:test:prepare
-   ```
 
 5. **Levantar servicios:**
    ```bash
@@ -39,10 +35,11 @@ API REST para gestión de productos (CRUD con búsqueda, filtrado y paginación)
    curl http://localhost:3000/api/v1/products
    ```
 
-7. **Tests:**
+7. **Tests:** Los tests deben ejecutarse con `RAILS_ENV=test` y la base de test creada/migrada (el contenedor usa `development` por defecto). Desde este directorio (`product-backend`):
    ```bash
-   docker compose run --rm app bundle exec rspec
+   docker compose run --rm -e RAILS_ENV=test -e POSTGRES_DB=product_app_test -e POSTGRES_DB_TEST=product_app_test app bash -c "bin/rails db:create db:migrate && bundle exec rspec"
    ```
+   Ese comando crea la BD de test si no existe, aplica migraciones y ejecuta RSpec.
 
 ## Documentación de API (OpenAPI / Swagger UI)
 

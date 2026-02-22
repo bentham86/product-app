@@ -3,14 +3,14 @@
 module Api
   module V1
     class ProductsController < ApplicationController
-      before_action :set_product, only: %i[show update destroy]
-      before_action :set_product_for_audits, only: %i[audits]
+      before_action :set_product, only: %i[ show update destroy ]
+      before_action :set_product_for_audits, only: %i[ audits ]
 
       def index
         relation = Product.without_deleted
         relation = relation.where("name ILIKE ?", "%#{params[:q]}%") if params[:q].present?
         relation = relation.where(active: params[:active]) if params[:active].present?
-        per_page = [[(params[:per_page].presence || 10).to_i, 100].min, 1].max
+        per_page = [ [ (params[:per_page].presence || 10).to_i, 100 ].min, 1 ].max
         pagy, products = pagy(relation, items: per_page)
         meta = { current_page: pagy.page, per_page: pagy.items, total_pages: pagy.pages, total_count: pagy.count }
         render json: { data: blueprint_list(products), meta: meta }
@@ -52,19 +52,17 @@ module Api
 
       def set_product
         @product = Product.without_deleted.find_by(id: params[:id])
-        unless @product
-          render json: { error: { code: "not_found", message: "Product not found" } }, status: :not_found
-          return
-        end
+        return if @product
+
+        render json: { error: { code: "not_found", message: "Product not found" } }, status: :not_found
       end
 
       def set_product_for_audits
         # Permite consultar historial por id aunque el producto esté soft-deleted
         @product_for_audits = Product.unscoped.find_by(id: params[:id])
-        unless @product_for_audits
-          render json: { error: { code: "not_found", message: "Product not found" } }, status: :not_found
-          return
-        end
+        return if @product_for_audits
+
+        render json: { error: { code: "not_found", message: "Product not found" } }, status: :not_found
       end
 
       def product_params

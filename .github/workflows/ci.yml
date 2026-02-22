@@ -67,7 +67,7 @@ jobs:
           POSTGRES_PASSWORD: postgres
           POSTGRES_HOST: localhost
           POSTGRES_PORT: "5432"
-        run: bin/rails db:test:prepare && bundle exec rspec
+        run: bin/rails db:create db:migrate && bundle exec rspec
 
   backend-security:
     name: Backend · Security

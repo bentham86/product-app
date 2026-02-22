@@ -25,6 +25,8 @@ services:
       RAILS_ENV: development
     ports:
       - "3000:3000"
+    volumes:
+      - .:/app
     depends_on:
       - db
 

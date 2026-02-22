@@ -30,7 +30,7 @@ module ProductApp
     config.api_only = true
 
     # Permit classes when serializing/deserializing YAML columns (e.g. audited's audited_changes).
-    config.active_record.yaml_column_permitted_classes = [
+    config.active_record.yaml_column_permitted_classes = [ 
       BigDecimal,
       Date,
       Symbol,
@@ -38,6 +38,6 @@ module ProductApp
       ActiveSupport::TimeWithZone,
       ActiveSupport::TimeZone,
       ActiveSupport::HashWithIndifferentAccess
-    ]
+     ]
   end
 end
