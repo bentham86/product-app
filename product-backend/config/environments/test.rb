@@ -16,7 +16,7 @@ Rails.application.configure do
   config.eager_load = ENV["CI"].present?
 
   # Configure public file server for tests with cache-control for performance.
-  config.public_file_server.headers = { "cache-control" => "public, max-age=3600" }
+  config.public_file_server.headers = { "cache-control": "public, max-age=3600" }
 
   # Show full error reports.
   config.consider_all_requests_local = true
@@ -27,6 +27,9 @@ Rails.application.configure do
 
   # Disable request forgery protection in test environment.
   config.action_controller.allow_forgery_protection = false
+
+  # Allow all hosts in test so request specs (default host www.example.com) are not 403.
+  config.hosts.clear
 
   # Store uploaded files on the local file system in a temporary directory.
   config.active_storage.service = :test

@@ -39,7 +39,8 @@ RSpec.describe Product, type: :model do
     end
 
     it "rejects sku that is not alphanumeric uppercase" do
-      product = build(:product, sku: "abc123")
+      # Use a SKU that stays invalid after normalize_sku (e.g. contains non-alphanumeric)
+      product = build(:product, sku: "SKU-001")
       expect(product).not_to be_valid
       expect(product.errors[:sku]).to include("must be alphanumeric uppercase")
     end

@@ -10,22 +10,9 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: 'Product Management',
   description: 'Manage your product catalog with full CRUD operations, search, and filtering.',
-  generator: 'v0.app',
+  generator: 'Ing. Efrain Benthan Gutierrez',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
+    icon: [],
     apple: '/apple-icon.png',
   },
 }

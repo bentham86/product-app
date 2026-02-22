@@ -10,6 +10,9 @@ class ProductBlueprint < Blueprinter::Base
   end
 
   view :list do
-    fields :name, :price, :sku, :active
+    exclude :description
+    exclude :stock
+    exclude :created_at
+    exclude :updated_at
   end
 end

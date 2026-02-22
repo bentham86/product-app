@@ -3,7 +3,7 @@
 require "rails_helper"
 
 RSpec.describe "Api::V1::Products", type: :request do
-  let(:headers) { { "CONTENT_TYPE" => "application/json" } }
+  let(:headers) { { "CONTENT_TYPE": "application/json" } }
 
   describe "GET /api/v1/products" do
     it "returns empty data and meta when no products" do

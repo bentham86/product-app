@@ -11,7 +11,7 @@ class Product < ApplicationRecord
   validates :stock, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0 }
   validates :sku, presence: true, uniqueness: true
   validate :sku_format
-  validates :active, inclusion: { in: [true, false] }
+  validates :active, inclusion: { in: [ true, false ] }
 
   scope :active, -> { where(active: true) }
   scope :without_deleted, -> { where(deleted_at: nil) }
@@ -19,8 +19,8 @@ class Product < ApplicationRecord
   private
 
   def sku_format
-    return if sku.blank?
-    return if sku.match?(/\A[A-Z0-9]+\z/)
+    return if sku.blank? || sku.match?(/\A[A-Z0-9]+\z/)
+
     errors.add(:sku, "must be alphanumeric uppercase")
   end
 
