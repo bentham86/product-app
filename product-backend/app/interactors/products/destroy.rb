@@ -5,7 +5,7 @@ module Products
     include Interactor
 
     def call
-      context.product.destroy
+      context.product.update!(deleted_at: Time.current)
     end
   end
 end

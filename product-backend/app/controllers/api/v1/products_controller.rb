@@ -6,7 +6,7 @@ module Api
       before_action :set_product, only: %i[show update destroy]
 
       def index
-        relation = Product.all
+        relation = Product.without_deleted
         relation = relation.where("name ILIKE ?", "%#{params[:q]}%") if params[:q].present?
         relation = relation.where(active: params[:active]) if params[:active].present?
         per_page = [[(params[:per_page].presence || 10).to_i, 100].min, 1].max
@@ -45,7 +45,7 @@ module Api
       private
 
       def set_product
-        @product = Product.find_by(id: params[:id])
+        @product = Product.without_deleted.find_by(id: params[:id])
         unless @product
           render json: { error: { code: "not_found", message: "Product not found" } }, status: :not_found
           return

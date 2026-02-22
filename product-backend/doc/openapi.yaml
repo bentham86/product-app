@@ -129,14 +129,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/ValidationErrorResponse"
     delete:
-      summary: Eliminar producto
-      description: Elimina un producto por ID.
+      summary: Eliminar producto (soft delete)
+      description: Marca el producto como eliminado (soft delete) actualizando `deleted_at`. El registro no se borra; deja de aparecer en GET list y GET :id. Responde 404 si el producto no existe o ya está soft-deleted.
       operationId: deleteProduct
       responses:
         "204":
-          description: Sin contenido (eliminado)
+          description: Sin contenido (producto marcado como eliminado)
         "404":
-          description: Producto no encontrado
+          description: Producto no encontrado o ya eliminado (soft-deleted)
           content:
             application/json:
               schema:

@@ -52,6 +52,16 @@ RSpec.describe "Api::V1::Products", type: :request do
       expect(json["data"].size).to eq(1)
       expect(json["data"].first["active"]).to eq(true)
     end
+
+    it "excludes soft-deleted products from list" do
+      p1 = create(:product, name: "Visible", sku: "V1")
+      create(:product, name: "Deleted", sku: "V2", deleted_at: Time.current)
+      get "/api/v1/products", headers: headers
+      json = JSON.parse(response.body)
+      expect(json["data"].size).to eq(1)
+      expect(json["data"].first["id"]).to eq(p1.id)
+      expect(json["data"].first["name"]).to eq("Visible")
+    end
   end
 
   describe "GET /api/v1/products/:id" do
@@ -72,6 +82,14 @@ RSpec.describe "Api::V1::Products", type: :request do
       json = JSON.parse(response.body)
       expect(json["error"]["code"]).to eq("not_found")
       expect(json["error"]["message"]).to eq("Product not found")
+    end
+
+    it "returns 404 when product is soft-deleted" do
+      product = create(:product, sku: "SD1", deleted_at: Time.current)
+      get "/api/v1/products/#{product.id}", headers: headers
+      expect(response).to have_http_status(:not_found)
+      json = JSON.parse(response.body)
+      expect(json["error"]["code"]).to eq("not_found")
     end
   end
 
@@ -130,15 +148,34 @@ RSpec.describe "Api::V1::Products", type: :request do
   end
 
   describe "DELETE /api/v1/products/:id" do
-    it "deletes product and returns 204" do
+    it "soft-deletes product and returns 204" do
       product = create(:product, sku: "D1")
       delete "/api/v1/products/#{product.id}", headers: headers
       expect(response).to have_http_status(:no_content)
-      expect(Product.find_by(id: product.id)).to be_nil
+      product.reload
+      expect(product.deleted_at).to be_present
+      expect(Product.without_deleted.find_by(id: product.id)).to be_nil
+    end
+
+    it "after soft delete product does not appear in list or show" do
+      product = create(:product, sku: "D2")
+      delete "/api/v1/products/#{product.id}", headers: headers
+      expect(response).to have_http_status(:no_content)
+      get "/api/v1/products", headers: headers
+      json = JSON.parse(response.body)
+      expect(json["data"].map { |e| e["id"] }).not_to include(product.id)
+      get "/api/v1/products/#{product.id}", headers: headers
+      expect(response).to have_http_status(:not_found)
     end
 
     it "returns 404 when product not found" do
       delete "/api/v1/products/99999", headers: headers
+      expect(response).to have_http_status(:not_found)
+    end
+
+    it "returns 404 when product is already soft-deleted" do
+      product = create(:product, sku: "D3", deleted_at: Time.current)
+      delete "/api/v1/products/#{product.id}", headers: headers
       expect(response).to have_http_status(:not_found)
     end
   end

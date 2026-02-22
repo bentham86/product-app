@@ -12,6 +12,7 @@ class Product < ApplicationRecord
   validates :active, inclusion: { in: [true, false] }
 
   scope :active, -> { where(active: true) }
+  scope :without_deleted, -> { where(deleted_at: nil) }
 
   private
 

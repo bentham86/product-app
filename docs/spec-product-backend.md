@@ -1,8 +1,7 @@
 # Especificación de Software Detallada
-# product-backend — Versión 2
 ## Enfoque: Spec Driven Development (SDD)
 
-**Versión:** 2.0  
+**Versión:** 1.0  
 **Fecha:** 2025-02-21  
 **Rol:** Senior Backend Developer / Arquitecto de Software
 
@@ -70,10 +69,11 @@
 | `stock` | integer | requerido, >= 0 | — |
 | `sku` | string | requerido, único, formato alfanumérico mayúsculas | — |
 | `active` | boolean | requerido | `true` |
+| `deleted_at` | datetime | opcional (soft delete) | `null` |
 | `created_at` | datetime | automático | — |
 | `updated_at` | datetime | automático | — |
 
-**Plus (Soft Delete):** Opcional: `deleted_at` (datetime, nullable). Listados y búsquedas excluyen registros con `deleted_at` presente.
+**Soft Delete (requerido):** El campo `deleted_at` (datetime, nullable) indica borrado lógico. Cuando tiene valor, el registro se considera eliminado. Listados y búsquedas **excluyen** siempre los registros con `deleted_at` presente. El endpoint DELETE debe marcar `deleted_at` (y opcionalmente `updated_at`) en lugar de borrar el registro físicamente.
 
 ### 3.2 Validaciones (estrictas)
 - **name:** presence, length: { minimum: 3, maximum: 100 }
@@ -85,7 +85,7 @@
 
 ### 3.3 Scopes
 - `active` / `activos`: `where(active: true)`.
-- Con soft delete: `without_deleted` → `where(deleted_at: nil)`.
+- **`without_deleted` (requerido):** `where(deleted_at: nil)`. Debe aplicarse en todas las consultas que exponen productos a la API (listado, detalle, búsqueda), de modo que los registros soft-deleted nunca se devuelvan. Opcionalmente se puede usar `default_scope { where(deleted_at: nil) }` para no olvidar filtrar.
 
 ---
 
@@ -156,11 +156,13 @@ Base URL: `/api/v1`
 ### 5.1 Listado con búsqueda y filtrado
 - **GET** `/api/v1/products`
   - **Query params:** `q` o `search` (nombre), `active` (boolean), `page`, `per_page`.
+  - **Alcance:** Solo productos no eliminados (scope `without_deleted`). Los registros con `deleted_at` presente no aparecen.
   - **Respuesta:** Lista paginada serializada con **ProductBlueprint vista `:list`**; estructura `{ "data": [...], "meta": { ... } }`.
 
 ### 5.2 Detalle
 - **GET** `/api/v1/products/:id`
-  - **Respuesta:** Un producto con **ProductBlueprint vista `:default`**; estructura `{ "data": { ... } }`. **404** si no existe (o soft-deleted según criterio).
+  - **Alcance:** Solo productos no eliminados (`without_deleted`). Si el id existe pero está soft-deleted, debe responderse **404**.
+  - **Respuesta:** Un producto con **ProductBlueprint vista `:default`**; estructura `{ "data": { ... } }`. **404** si no existe o si está soft-deleted.
 
 ### 5.3 Creación
 - **POST** `/api/v1/products`
@@ -174,10 +176,10 @@ Base URL: `/api/v1`
   - **Lógica:** Interactor `Products::Update`.
   - **Respuesta:** 200 y **ProductBlueprint** (vista default) en `data`. **404** / **422** según caso.
 
-### 5.5 Eliminación
+### 5.5 Eliminación (Soft Delete)
 - **DELETE** `/api/v1/products/:id`
   - **Lógica:** Interactor `Products::Destroy`.
-  - **Comportamiento:** Borrado físico o soft delete (Plus). Respuesta 200/204; si hay body, puede ser `{ "data": null }` o mensaje. No usar blueprint de producto.
+  - **Comportamiento (requerido):** **Soft delete.** No se borra el registro; se actualiza `deleted_at` con la fecha/hora actual (y opcionalmente `updated_at`). El registro deja de aparecer en GET list y GET :id por el scope `without_deleted`. Respuesta **204** sin body (o 200 con `{ "data": null }` si se prefiere). **404** si el producto no existe o ya está soft-deleted. No usar blueprint de producto en la respuesta.
 
 ---
 
@@ -208,9 +210,10 @@ Base URL: `/api/v1`
 - **ErrorBlueprint** (si existe): que exponga `code`, `message`, y `details` cuando se pasen.
 
 ### 7.3 Request Specs (integración)
-- GET list: listado vacío, con datos, paginación, búsqueda, filtro `active`; comprobar que el cuerpo usa la estructura `data` + `meta` y que cada ítem en `data` tiene solo los campos de la vista list.
-- GET :id: éxito con estructura de detalle (todos los campos del blueprint default); 404 cuando corresponda.
+- GET list: listado vacío, con datos, paginación, búsqueda, filtro `active`; comprobar que el cuerpo usa la estructura `data` + `meta` y que cada ítem en `data` tiene solo los campos de la vista list. **Productos soft-deleted no deben aparecer** en el listado.
+- GET :id: éxito con estructura de detalle (todos los campos del blueprint default); **404 cuando no existe o cuando el producto está soft-deleted**.
 - POST / PUT: 201/200 con `data` serializada como detalle; 404/422 con cuerpo de error estándar (o ErrorBlueprint).
+- DELETE: **soft delete** (marcar `deleted_at`); respuesta 204 (o 200); 404 si no existe o ya está soft-deleted. Verificar que tras DELETE el producto no aparece en GET list ni GET :id.
 
 ### 7.4 Casos de Error
 - 404 y 422 con formato de error acordado (§10.2 o ErrorBlueprint).
@@ -379,5 +382,6 @@ Si se implementa **ErrorBlueprint**, este mismo formato puede generarse con `Err
 | 5 | Implementar **ProductBlueprint** con vista `:default` (detalle) y vista `:list` (listado); opcional **ErrorBlueprint**. |
 | 6 | Controladores: usar solo blueprints para serializar recursos Product; no construir hashes de respuesta a mano. |
 | 7 | Tests: specs de blueprints (vistas default y list); request specs comprobando estructura y campos según blueprint. |
+| 8 | **Soft delete (requerido):** Campo `deleted_at` en `products`; scope `without_deleted` en listado/detalle; DELETE actualiza `deleted_at` en lugar de borrar; 404 para recursos soft-deleted en GET :id y DELETE. |
 
 ---

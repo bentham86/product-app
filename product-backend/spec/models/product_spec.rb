@@ -68,5 +68,13 @@ RSpec.describe Product, type: :model do
         expect(Product.active).to eq([active_product])
       end
     end
+
+    describe ".without_deleted" do
+      it "returns only products without deleted_at set" do
+        visible = create(:product, sku: "S1")
+        create(:product, sku: "S2", deleted_at: Time.current)
+        expect(Product.without_deleted).to eq([visible])
+      end
+    end
   end
 end
