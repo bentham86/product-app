@@ -4,6 +4,7 @@ module Api
   module V1
     class ProductsController < ApplicationController
       before_action :set_product, only: %i[show update destroy]
+      before_action :set_product_for_audits, only: %i[audits]
 
       def index
         relation = Product.without_deleted
@@ -42,6 +43,11 @@ module Api
         head :no_content
       end
 
+      def audits
+        audits_list = @product_for_audits.audits.reorder(created_at: :desc)
+        render json: { data: JSON.parse(AuditBlueprint.render(audits_list)) }
+      end
+
       private
 
       def set_product
@@ -52,8 +58,18 @@ module Api
         end
       end
 
+      def set_product_for_audits
+        # Permite consultar historial por id aunque el producto esté soft-deleted
+        @product_for_audits = Product.unscoped.find_by(id: params[:id])
+        unless @product_for_audits
+          render json: { error: { code: "not_found", message: "Product not found" } }, status: :not_found
+          return
+        end
+      end
+
       def product_params
-        params.permit(:name, :description, :price, :stock, :sku, :active)
+        base = params.key?(:product) ? params.require(:product) : params
+        base.permit(:name, :description, :price, :stock, :sku, :active)
       end
 
       def blueprint_single(product)

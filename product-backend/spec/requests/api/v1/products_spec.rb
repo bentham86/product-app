@@ -93,6 +93,43 @@ RSpec.describe "Api::V1::Products", type: :request do
     end
   end
 
+  describe "GET /api/v1/products/:id/audits" do
+    it "returns audit history for product (create + update)" do
+      product = create(:product, name: "First", sku: "AUD1", price: 10)
+      product.update!(name: "Updated", price: 20)
+      get "/api/v1/products/#{product.id}/audits", headers: headers
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json).to have_key("data")
+      expect(json["data"]).to be_an(Array)
+      expect(json["data"].size).to eq(2)
+      actions = json["data"].map { |a| a["action"] }.sort
+      expect(actions).to eq(%w[create update])
+      create_audit = json["data"].find { |a| a["action"] == "create" }
+      expect(create_audit).to have_key("changes")
+      expect(create_audit).to have_key("created_at")
+      update_audit = json["data"].find { |a| a["action"] == "update" }
+      expect(update_audit["changes"].keys).to include("name", "price")
+    end
+
+    it "returns audits for soft-deleted product" do
+      product = create(:product, sku: "AUD2")
+      product.update!(deleted_at: Time.current)
+      get "/api/v1/products/#{product.id}/audits", headers: headers
+      expect(response).to have_http_status(:ok)
+      json = JSON.parse(response.body)
+      expect(json["data"]).to be_an(Array)
+      expect(json["data"].size).to be >= 1
+    end
+
+    it "returns 404 when product id does not exist" do
+      get "/api/v1/products/99999/audits", headers: headers
+      expect(response).to have_http_status(:not_found)
+      json = JSON.parse(response.body)
+      expect(json["error"]["code"]).to eq("not_found")
+    end
+  end
+
   describe "POST /api/v1/products" do
     it "creates product and returns 201 with data" do
       post "/api/v1/products", params: {

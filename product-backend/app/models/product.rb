@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Product < ApplicationRecord
+  audited only: %i[name description price stock sku active deleted_at]
+
   before_validation :normalize_sku
 
   validates :name, presence: true, length: { minimum: 3, maximum: 100 }

@@ -17,6 +17,7 @@
 - API REST para gestión completa de productos (Create, Read, Update, Delete).
 - Búsqueda por nombre y filtrado por estado (`active`).
 - Paginación en listados.
+- **Trazabilidad de cambios (auditoría):** registro automático de create/update/delete por producto y endpoint para consultar el historial por API.
 - **Respuestas JSON generadas por Blueprints/Serializers** (objetos de dominio → JSON limpio y eficiente).
 - Entorno reproducible con Docker.
 
@@ -87,6 +88,14 @@
 - `active` / `activos`: `where(active: true)`.
 - **`without_deleted` (requerido):** `where(deleted_at: nil)`. Debe aplicarse en todas las consultas que exponen productos a la API (listado, detalle, búsqueda), de modo que los registros soft-deleted nunca se devuelvan. Opcionalmente se puede usar `default_scope { where(deleted_at: nil) }` para no olvidar filtrar.
 
+### 3.4 Trazabilidad de cambios (auditoría)
+
+- **Objetivo:** Poder consultar qué cambió en cada producto, cuándo y (opcionalmente en el futuro) quién.
+- **Implementación recomendada:** Gema **audited**. El modelo `Product` declara `audited only: [:name, :description, :price, :stock, :sku, :active, :deleted_at]` para registrar solo esos atributos.
+- **Tabla `audits`:** Creada por la gema (migración `install_audited`). Campos relevantes: `auditable_type`, `auditable_id`, `action` (create/update/destroy), `audited_changes` (text/YAML o JSON con los valores anteriores y nuevos), `created_at`.
+- **Comportamiento:** Cada create, update o soft delete (update de `deleted_at`) genera un registro en `audits`. El endpoint de historial devuelve estos registros ordenados por fecha descendente.
+- **Consulta por producto:** Se permite consultar el historial por `id` de producto aunque el producto esté soft-deleted (uso de `Product.unscoped` o equivalente para localizar el producto por id antes de leer sus `audits`).
+
 ---
 
 ## 4. Blueprints y Serializers (Especificación)
@@ -145,7 +154,14 @@ Para respuestas de error homogéneas:
 - **Campos:** `code`, `message`, `details` (opcional, para 422).
 - Uso: `ErrorBlueprint.render(error_object)` donde `error_object` es un objeto o hash con `code`, `message`, `details`. La respuesta HTTP sería `{ "error": ErrorBlueprint.render(...) }`.
 
-Si no se usa blueprint para errores, se mantiene el hash fijo definido en §10.2.
+Si no se usa blueprint para errores, se mantiene el hash fijo definido en §11.4.
+
+### 4.5 AuditBlueprint
+
+- **Ubicación:** `app/blueprints/audit_blueprint.rb`.
+- **Uso:** Serializar registros de la tabla `audits` para la respuesta de **GET /api/v1/products/:id/audits**.
+- **Campos expuestos:** `id`, `action` (create/update/destroy), `changes` (mapeo de `audited_changes`: atributos que cambiaron y valores anterior/nuevo), `created_at`.
+- Respuesta de lista: `{ "data": [ AuditBlueprint.render(audit), ... ] }` (orden recomendado: más reciente primero).
 
 ---
 
@@ -181,6 +197,12 @@ Base URL: `/api/v1`
   - **Lógica:** Interactor `Products::Destroy`.
   - **Comportamiento (requerido):** **Soft delete.** No se borra el registro; se actualiza `deleted_at` con la fecha/hora actual (y opcionalmente `updated_at`). El registro deja de aparecer en GET list y GET :id por el scope `without_deleted`. Respuesta **204** sin body (o 200 con `{ "data": null }` si se prefiere). **404** si el producto no existe o ya está soft-deleted. No usar blueprint de producto en la respuesta.
 
+### 5.6 Historial de auditoría
+- **GET** `/api/v1/products/:id/audits`
+  - **Descripción:** Devuelve el historial de cambios (auditoría) del producto: registros create, update y (si aplica) destroy, ordenados por fecha descendente.
+  - **Alcance:** Se permite consultar por `id` aunque el producto esté soft-deleted (el producto se localiza por id sin scope `without_deleted`; si el id no existe en absoluto, 404).
+  - **Respuesta:** 200 y cuerpo `{ "data": [ ... ] }` donde cada ítem es un registro de auditoría serializado con **AuditBlueprint** (campos: `id`, `action`, `changes`, `created_at`). **404** si no existe ningún producto con ese id.
+
 ---
 
 ## 6. Infraestructura (Docker)
@@ -207,16 +229,18 @@ Base URL: `/api/v1`
 - **ProductBlueprint:**
   - Vista `:default`: incluye todos los campos definidos; `price` con formato esperado.
   - Vista `:list`: incluye solo los campos de la vista list; no incluye `description`, `created_at`, `updated_at`.
+- **AuditBlueprint:** que exponga `id`, `action`, `changes`, `created_at` para registros de auditoría.
 - **ErrorBlueprint** (si existe): que exponga `code`, `message`, y `details` cuando se pasen.
 
 ### 7.3 Request Specs (integración)
 - GET list: listado vacío, con datos, paginación, búsqueda, filtro `active`; comprobar que el cuerpo usa la estructura `data` + `meta` y que cada ítem en `data` tiene solo los campos de la vista list. **Productos soft-deleted no deben aparecer** en el listado.
 - GET :id: éxito con estructura de detalle (todos los campos del blueprint default); **404 cuando no existe o cuando el producto está soft-deleted**.
+- **GET :id/audits:** éxito con `data` como array de registros de auditoría (action, changes, created_at); al menos create y update tras crear y actualizar un producto; permite consultar historial de un producto soft-deleted por id; 404 cuando el id no existe.
 - POST / PUT: 201/200 con `data` serializada como detalle; 404/422 con cuerpo de error estándar (o ErrorBlueprint).
 - DELETE: **soft delete** (marcar `deleted_at`); respuesta 204 (o 200); 404 si no existe o ya está soft-deleted. Verificar que tras DELETE el producto no aparece en GET list ni GET :id.
 
 ### 7.4 Casos de Error
-- 404 y 422 con formato de error acordado (§10.2 o ErrorBlueprint).
+- 404 y 422 con formato de error acordado (§11.4 o ErrorBlueprint).
 
 ---
 
@@ -227,6 +251,7 @@ product-backend/
 ├── app/
 │   ├── blueprints/
 │   │   ├── product_blueprint.rb
+│   │   ├── audit_blueprint.rb
 │   │   └── error_blueprint.rb          # opcional
 │   ├── controllers/
 │   │   └── api/
@@ -275,6 +300,7 @@ product-backend/
 - **pagy** (o kaminari).
 - **rack-cors**.
 - **blueprinter** — serialización de objetos a JSON (blueprints y vistas).
+- **audited** — trazabilidad de cambios (tabla `audits`, asociación en Product, historial consultable por API).
 
 ### 9.2 Desarrollo / Test
 - **rspec-rails**, **factory_bot_rails**, **faker** (opcional).
@@ -340,7 +366,11 @@ Ejemplo:
 
 - **DELETE:** 204 sin body o 200 con `{ "data": null }` o mensaje; no usa ProductBlueprint.
 
-### 11.3 Errores (hash fijo o ErrorBlueprint)
+### 11.3 Éxito — Historial de auditoría (GET /products/:id/audits)
+
+Estructura: `{ "data": [ <registros AuditBlueprint>, ... ] }`. Cada registro incluye `id`, `action` (create/update/destroy), `changes` (objeto con los atributos que cambiaron; en update suele ser pares valor anterior → valor nuevo), `created_at` (ISO 8601). Orden: más reciente primero.
+
+### 11.4 Errores (hash fijo o ErrorBlueprint)
 
 **404:**
 ```json
@@ -383,5 +413,6 @@ Si se implementa **ErrorBlueprint**, este mismo formato puede generarse con `Err
 | 6 | Controladores: usar solo blueprints para serializar recursos Product; no construir hashes de respuesta a mano. |
 | 7 | Tests: specs de blueprints (vistas default y list); request specs comprobando estructura y campos según blueprint. |
 | 8 | **Soft delete (requerido):** Campo `deleted_at` en `products`; scope `without_deleted` en listado/detalle; DELETE actualiza `deleted_at` en lugar de borrar; 404 para recursos soft-deleted en GET :id y DELETE. |
+| 9 | **Trazabilidad de cambios (auditoría):** Gema audited; migración tabla `audits`; modelo Product con `audited only: [...]`; **AuditBlueprint** para serializar registros; endpoint GET `/api/v1/products/:id/audits` que devuelve historial ordenado (más reciente primero); permitir consulta por id aunque el producto esté soft-deleted; request specs y OpenAPI para el endpoint. |
 
 ---

@@ -56,13 +56,20 @@ API REST para gestión de productos (CRUD con búsqueda, filtrado y paginación)
 |--------|------|-------------|
 | GET | /api/v1/products | Listado (q, active, page, per_page) |
 | GET | /api/v1/products/:id | Detalle |
+| GET | /api/v1/products/:id/audits | Historial de cambios (auditoría) |
 | POST | /api/v1/products | Crear |
 | PUT | /api/v1/products/:id | Actualizar |
-| DELETE | /api/v1/products/:id | Eliminar |
+| DELETE | /api/v1/products/:id | Eliminar (soft delete) |
+
+## Trazabilidad de cambios
+
+Los cambios en productos (create, update, soft delete) se registran con la gema **audited**. El endpoint `GET /api/v1/products/:id/audits` devuelve el historial ordenado por fecha (más reciente primero). Se puede consultar por id aunque el producto esté soft-deleted.
+
+**Si al crear un producto obtienes 500 y en el log aparece ROLLBACK tras el INSERT:** suele deberse a que la tabla `audits` no existe. Ejecuta las migraciones (en Docker: `docker compose run --rm app bundle exec rails db:migrate`) o reinicia los contenedores para que el entrypoint ejecute las migraciones.
 
 ## Estructura relevante
 
-- `app/blueprints/` — ProductBlueprint (vistas :default y :list)
+- `app/blueprints/` — ProductBlueprint, AuditBlueprint
 - `app/interactors/products/` — Create, Update, Destroy
 - `app/controllers/api/v1/products_controller.rb`
 - `config/routes.rb` — namespace api/v1

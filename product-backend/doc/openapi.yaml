@@ -142,6 +142,32 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /api/v1/products/{id}/audits:
+    get:
+      summary: Historial de cambios (auditoría)
+      description: Devuelve el historial de auditoría del producto (create, update, destroy). Ordenado por fecha descendente. Permite consultar por id aunque el producto esté soft-deleted.
+      operationId: getProductAudits
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del producto
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lista de registros de auditoría
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductAuditsResponse"
+        "404":
+          description: Producto no encontrado (id inexistente)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     Product:
@@ -243,6 +269,32 @@ components:
         active:
           type: boolean
           default: true
+
+    ProductAudit:
+      type: object
+      description: Registro de auditoría (trazabilidad de cambios)
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        action:
+          type: string
+          enum: [create, update, destroy]
+        changes:
+          type: object
+          description: Atributos modificados; en create/destroy puede ser el conjunto completo; en update solo los campos que cambiaron (valor anterior y nuevo)
+          additionalProperties: true
+        created_at:
+          type: string
+          format: date-time
+
+    ProductAuditsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductAudit"
 
     ErrorResponse:
       type: object
