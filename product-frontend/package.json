@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "clean": "rm -rf node_modules .next && pnpm store prune && pnpm install",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -12,7 +13,7 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
-    "@hookform/resolvers": "^3.9.1",
+    "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "1.2.12",
     "@radix-ui/react-alert-dialog": "1.1.15",
     "@radix-ui/react-aspect-ratio": "1.1.8",
@@ -57,7 +58,7 @@
     "react-dom": "19.2.4",
     "react-hook-form": "^7.54.1",
     "react-resizable-panels": "^4.6.5",
-    "recharts": "2.15.0",
+    "recharts": "3.7.0",
     "sonner": "^1.7.1",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
@@ -69,7 +70,7 @@
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
-    "@types/node": "^22",
+    "@types/node": "^25",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "eslint": "^9.39.3",
