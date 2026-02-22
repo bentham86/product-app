@@ -1,0 +1,12 @@
+# pnpm
+.pnpm-store/
+
+# OS / editor
+.DS_Store
+*.swp
+*.swo
+Thumbs.db
+
+# Env (por si se crean en raíz)
+.env
+.env*.local
