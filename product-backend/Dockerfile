@@ -69,6 +69,6 @@ COPY --chown=rails:rails --from=build /rails /rails
 # Entrypoint prepares the database.
 ENTRYPOINT ["/rails/bin/docker-entrypoint"]
 
-# Start server via Thruster by default, this can be overwritten at runtime
+# When PORT is set (e.g. Railway, Heroku), run Puma on that port; otherwise use Thruster on 80.
 EXPOSE 80
-CMD ["./bin/thrust", "./bin/rails", "server"]
+CMD ["sh", "-c", "./bin/rails db:prepare && if [ -n \"$PORT\" ]; then exec bundle exec puma -C config/puma.rb; else exec ./bin/thrust ./bin/rails server; fi"]

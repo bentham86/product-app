@@ -59,6 +59,8 @@ Puedes elegir la variable desde el desplegable de referencias al crear/editar la
 
 ### 5. Comando de arranque (migraciones + servidor)
 
+Si usas el **Dockerfile** del repo, la imagen ya arranca en el `PORT` que asigna Railway (no hace falta Custom Start Command). Si usas **Nixpacks** (sin Dockerfile), configura:
+
 1. En el **servicio de la app**, ve a **Settings** → sección **Deploy** (o **Build & Deploy**).
 2. En **Custom Start Command** (o "Start Command") pon:
 
@@ -67,7 +69,7 @@ bin/rails db:prepare && bundle exec puma -C config/puma.rb
 ```
 
 - `db:prepare`: crea la base si no existe y ejecuta migraciones.
-- Puma ya usa `PORT` que Railway asigna.
+- Puma usa el `PORT` que Railway asigna.
 
 Guarda los cambios.
 
@@ -154,7 +156,9 @@ Si prefieres no usar GitHub:
 
 ## Notas
 
-- **Railway y Docker:** Si en la raíz de `product-backend` hay un `Dockerfile`, Railway puede usarlo. Si ese Dockerfile falla (por ejemplo por `vendor/`), en **Settings → Build** puedes desactivar el uso del Dockerfile para que Railway use **Nixpacks** (detección automática de Rails).
+- **Railway y Docker:** Si en la raíz de `product-backend` hay un `Dockerfile`, Railway puede usarlo. La imagen actual **respeta la variable `PORT`** que Railway asigna: si `PORT` está definida, arranca Puma en ese puerto; si no (p. ej. `docker run` local), usa Thruster en el puerto 80. Así se evita el error 502 por escuchar en un puerto distinto al que espera el proxy.
+- **502 / "Starting Container":** Si antes veías 502 o el contenedor se quedaba en "Starting Container", era porque el Dockerfile arrancaba en el puerto 80 y Railway reenvía al puerto que inyecta en `PORT`. Con el cambio anterior ya no hace falta configurar Custom Start Command cuando usas el Dockerfile (aunque puedes hacerlo si quieres).
+- Si el Dockerfile falla (p. ej. por `vendor/`), en **Settings → Build** puedes desactivar el uso del Dockerfile para que Railway use **Nixpacks** (detección automática de Rails) y sí configurar el Custom Start Command de la sección 5.
 - **Credits / plan:** Railway tiene un período de prueba y luego plan de pago; revisa la web para precios actuales.
 - **CORS:** Si luego usas un frontend en otro dominio (p. ej. Vercel), configura CORS en `config/initializers/cors.rb` para ese origen.
 
