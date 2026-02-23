@@ -56,3 +56,21 @@ pnpm dev
 ```
 
 App en http://localhost:3000. Sin `NEXT_PUBLIC_API_BASE_URL` arranca en modo mock; para conectar al backend local suele usarse `http://localhost:3001` (o el puerto del backend).
+
+## Mejoras futuras
+
+Ideas para ampliar el proyecto con más tiempo:
+
+| Área | Mejora |
+|------|--------|
+| **Autenticación y autorización** | Login (JWT o sesiones), roles (admin/lector), protección de endpoints y rutas en el frontend. |
+| **Rate limiting** | Límite de peticiones por IP o por usuario en el backend para evitar abuso. |
+| **Tests E2E** | Flujos completos con Playwright o Cypress (crear producto, editar, ver historial, eliminar) contra frontend + API. |
+| **Imágenes de productos** | Campo opcional para foto (almacenamiento en S3 o similar; Active Storage en Rails); vista previa en listado y formulario. |
+| **Internacionalización (i18n)** | Soporte para varios idiomas en el frontend (y opcionalmente en mensajes de la API). |
+| **Restaurar productos eliminados** | Endpoint y UI para “restore” de productos con soft delete (poner `deleted_at` en null). |
+| **Filtros y ordenación** | Más filtros en el listado (por rango de precio, por SKU), ordenación por columna (nombre, precio, fecha). |
+| **Exportar datos** | Exportar listado a CSV o Excel desde el frontend o vía endpoint. |
+| **Monitoreo y alertas** | Health check explícito (`/health`), métricas (ej. Prometheus) y alertas si la API o el frontend caen. |
+| **Paginación en historial** | Si un producto tiene muchos audits, paginar o limitar la respuesta de `GET /products/:id/audits`. |
+| **Tema oscuro** | Toggle de tema claro/oscuro en el frontend (Tailwind dark mode ya facilita la base). |
