@@ -29,7 +29,7 @@ describe("ProductFilters", () => {
     renderFilters()
 
     expect(
-      screen.getByPlaceholderText(/search by name or sku/i)
+      screen.getByPlaceholderText(/search by name/i)
     ).toBeInTheDocument()
     expect(screen.getByRole("combobox")).toBeInTheDocument()
   })
@@ -38,7 +38,7 @@ describe("ProductFilters", () => {
     const user = userEvent.setup()
     renderFilters()
 
-    const input = screen.getByPlaceholderText(/search by name or sku/i)
+    const input = screen.getByPlaceholderText(/search by name/i)
     await user.type(input, "test")
 
     expect(defaultProps.onSearchChange).toHaveBeenCalled()
@@ -47,7 +47,7 @@ describe("ProductFilters", () => {
   it("displays current search value", () => {
     renderFilters({ searchQuery: "widget" })
 
-    const input = screen.getByPlaceholderText(/search by name or sku/i)
+    const input = screen.getByPlaceholderText(/search by name/i)
     expect(input).toHaveValue("widget")
   })
 
