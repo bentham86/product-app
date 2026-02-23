@@ -10,6 +10,7 @@ import { ProductTable } from "@/components/products/product-table"
 import { ProductCardList } from "@/components/products/product-card-list"
 import { ProductFormDialog } from "@/components/products/product-form-dialog"
 import { DeleteConfirmDialog } from "@/components/products/delete-confirm-dialog"
+import { AuditHistoryModal } from "@/components/products/audit-history-modal"
 import { ProductPagination } from "@/components/products/product-pagination"
 import { ProductEmptyState } from "@/components/products/product-empty-state"
 import { ProductLoadingSkeleton } from "@/components/products/product-loading-skeleton"
@@ -23,8 +24,12 @@ export function ProductsPage() {
   const [activeFilter, setActiveFilter] = useState("all")
   const [formDialogOpen, setFormDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [editProduct, setEditProduct] = useState<ProductListItem | null>(null)
   const [deleteProduct, setDeleteProduct] = useState<ProductListItem | null>(
+    null
+  )
+  const [historyProduct, setHistoryProduct] = useState<ProductListItem | null>(
     null
   )
 
@@ -71,6 +76,11 @@ export function ProductsPage() {
   const handleDeleteClick = useCallback((product: ProductListItem) => {
     setDeleteProduct(product)
     setDeleteDialogOpen(true)
+  }, [])
+
+  const handleHistoryClick = useCallback((product: ProductListItem) => {
+    setHistoryProduct(product)
+    setHistoryDialogOpen(true)
   }, [])
 
   const handleClearFilters = useCallback(() => {
@@ -144,11 +154,13 @@ export function ProductsPage() {
               products={data.data}
               onEdit={handleEditClick}
               onDelete={handleDeleteClick}
+              onHistory={handleHistoryClick}
             />
             <ProductCardList
               products={data.data}
               onEdit={handleEditClick}
               onDelete={handleDeleteClick}
+              onHistory={handleHistoryClick}
             />
           </>
         )}
@@ -171,6 +183,11 @@ export function ProductsPage() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         product={deleteProduct}
+      />
+      <AuditHistoryModal
+        open={historyDialogOpen}
+        onOpenChange={setHistoryDialogOpen}
+        product={historyProduct}
       />
     </div>
   )

@@ -4,6 +4,8 @@ import type {
   ProductListResponse,
   ProductInput,
   PaginationMeta,
+  ProductAudit,
+  ProductAuditListResponse,
 } from "@/types/product"
 
 export const fixtureProduct: Product = {
@@ -53,4 +55,27 @@ export const fixtureProductInput: ProductInput = {
   stock: 5,
   sku: "NEW001",
   active: true,
+}
+
+export const fixtureProductAudit: ProductAudit = {
+  id: 33,
+  action: "create",
+  changes: {
+    name: "Product E",
+    description: null,
+    price: "10.0",
+    stock: 2,
+    sku: "SKU006",
+    active: true,
+    deleted_at: null,
+  },
+  created_at: "2026-02-22 22:07:48 UTC",
+}
+
+export const fixtureProductAuditListResponse: ProductAuditListResponse = {
+  data: [fixtureProductAudit],
+}
+
+export const fixtureEmptyAuditListResponse: ProductAuditListResponse = {
+  data: [],
 }

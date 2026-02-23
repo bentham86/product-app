@@ -57,3 +57,27 @@ export interface ProductListParams {
   q?: string
   active?: boolean | null
 }
+
+// --- Product audit (historial) ---
+
+export interface ProductAuditChanges {
+  name?: string
+  description?: string | null
+  price?: string
+  stock?: number
+  sku?: string
+  active?: boolean
+  deleted_at?: string | null
+  [key: string]: string | number | boolean | null | undefined
+}
+
+export interface ProductAudit {
+  id: number
+  action: string
+  changes: ProductAuditChanges
+  created_at: string
+}
+
+export interface ProductAuditListResponse {
+  data: ProductAudit[]
+}

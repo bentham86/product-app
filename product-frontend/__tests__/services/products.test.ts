@@ -18,11 +18,13 @@ import {
   createProduct,
   updateProduct,
   deleteProduct,
+  fetchProductAudits,
 } from "@/services/products"
 import {
   fixtureProduct,
   fixtureProductListResponse,
   fixtureProductInput,
+  fixtureProductAuditListResponse,
 } from "../fixtures/products"
 
 describe("products service", () => {
@@ -194,6 +196,59 @@ describe("products service", () => {
       })
 
       await expect(deleteProduct(999)).rejects.toMatchObject({
+        error: { code: "not_found" },
+      })
+    })
+  })
+
+  describe("fetchProductAudits", () => {
+    it("builds URL with product id and returns ProductAuditListResponse", async () => {
+      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve(fixtureProductAuditListResponse),
+      })
+
+      const result = await fetchProductAudits(5)
+
+      expect(global.fetch).toHaveBeenCalledWith(
+        `${BASE_URL}/api/v1/products/5/audits`,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          }),
+        })
+      )
+      expect(result).toEqual(fixtureProductAuditListResponse)
+      expect(result.data).toHaveLength(1)
+      expect(result.data[0].action).toBe("create")
+      expect(result.data[0].changes).toHaveProperty("name", "Product E")
+    })
+
+    it("returns empty data array when API returns no audits", async () => {
+      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ data: [] }),
+      })
+
+      const result = await fetchProductAudits(1)
+
+      expect(result.data).toEqual([])
+    })
+
+    it("throws on 404 when product does not exist", async () => {
+      ;(global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: false,
+        status: 404,
+        json: () =>
+          Promise.resolve({
+            error: { code: "not_found", message: "Product not found" },
+          }),
+      })
+
+      await expect(fetchProductAudits(999)).rejects.toMatchObject({
         error: { code: "not_found" },
       })
     })

@@ -16,16 +16,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
+import { MoreHorizontal, Pencil, Trash2, History } from "lucide-react"
 import type { ProductListItem } from "@/types/product"
 
 interface ProductTableProps {
   products: ProductListItem[]
   onEdit: (product: ProductListItem) => void
   onDelete: (product: ProductListItem) => void
+  onHistory: (product: ProductListItem) => void
 }
 
-export function ProductTable({ products, onEdit, onDelete }: ProductTableProps) {
+export function ProductTable({ products, onEdit, onDelete, onHistory }: ProductTableProps) {
   return (
     <div className="hidden md:block">
       <div className="rounded-lg border">
@@ -79,6 +80,10 @@ export function ProductTable({ products, onEdit, onDelete }: ProductTableProps) 
                       <DropdownMenuItem onClick={() => onEdit(product)}>
                         <Pencil className="size-4" />
                         Edit
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => onHistory(product)}>
+                        <History className="size-4" />
+                        History
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => onDelete(product)}

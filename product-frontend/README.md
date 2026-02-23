@@ -10,6 +10,41 @@ Panel de administración de productos (CRUD con búsqueda, filtrado y paginació
 - Tailwind CSS v4, shadcn/ui (Radix), Sonner
 - Jest + React Testing Library (tests)
 
+## Diagrama de arquitectura (alto nivel)
+
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                    product-frontend                      │
+                    │                                                          │
+  Usuario            │   ┌──────────────┐     ┌─────────────────┐             │
+  (navegador) ──────┼──►│   Next.js    │     │  TanStack       │             │
+                    │   │   App Router │────►│  Query (hooks)  │             │
+                    │   │   + React    │     │  useProducts,   │             │
+                    │   │   (páginas,  │     │  useProduct,    │             │
+                    │   │   layout)    │     │  useProductAudits│             │
+                    │   └──────┬───────┘     └────────┬────────┘             │
+                    │          │                      │                       │
+                    │          │                      ▼                       │
+                    │   ┌──────▼──────────────────────────────┐               │
+                    │   │  services/products.ts               │               │
+                    │   │  (fetchProducts, fetchProduct,      │───────────────┼──► API Backend
+                    │   │   createProduct, updateProduct,     │   HTTP/JSON   │   (Railway o
+                    │   │   deleteProduct, fetchProductAudits)│               │    local)
+                    │   └────────────────────────────────────┘               │
+                    │          │                                              │
+                    │          │ Si NEXT_PUBLIC_API_BASE_URL vacío            │
+                    │          ▼                                              │
+                    │   ┌──────────────┐     ┌─────────────┐                  │
+                    │   │  lib/        │     │  types/     │                  │
+                    │   │  mock-data   │     │  product.ts │                  │
+                    │   │  (modo mock) │     │  (contrato) │                  │
+                    │   └──────────────┘     └─────────────┘                  │
+                    │                                                          │
+                    └─────────────────────────────────────────────────────────┘
+```
+
+**Flujo:** El usuario interactúa con la app Next.js (listado, formularios, historial). Los hooks (TanStack Query) gestionan estado y caché y llaman a la capa de servicios. Los servicios envían HTTP al backend o usan datos mock si no hay URL de API. En producción (Vercel) se configura `NEXT_PUBLIC_API_BASE_URL` apuntando al backend en Railway.
+
 ## Guía de configuración (local)
 
 1. **Requisitos:** Node.js >= 18.18, pnpm (o npm/yarn).
@@ -58,6 +93,7 @@ El backend debe exponer la API REST bajo `/api/v1`. Contrato detallado en `docs/
 | -------- | ------------------------ | ---------------- |
 | GET      | /api/v1/products         | Listado (q, active, page, per_page) |
 | GET      | /api/v1/products/:id     | Detalle          |
+| GET      | /api/v1/products/:id/audits | Historial de auditoría (action, changes) |
 | POST     | /api/v1/products         | Crear            |
 | PUT      | /api/v1/products/:id     | Actualizar       |
 | DELETE   | /api/v1/products/:id     | Eliminar         |

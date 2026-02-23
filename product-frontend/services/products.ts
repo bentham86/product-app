@@ -4,6 +4,8 @@ import type {
   Product,
   ProductInput,
   ApiError,
+  ProductAudit,
+  ProductAuditListResponse,
 } from "@/types/product"
 import {
   getMockProducts,
@@ -288,4 +290,25 @@ async function deleteProductMock(id: number): Promise<void> {
   }
 
   setMockProducts(products.filter((p) => p.id !== id))
+}
+
+// --- Product audits (historial) ---
+
+export async function fetchProductAudits(
+  productId: number
+): Promise<ProductAuditListResponse> {
+  if (USE_MOCK) {
+    return fetchProductAuditsMock(productId)
+  }
+
+  return apiRequest<ProductAuditListResponse>(
+    `/api/v1/products/${productId}/audits`
+  )
+}
+
+async function fetchProductAuditsMock(
+  _productId: number
+): Promise<ProductAuditListResponse> {
+  await delay(300)
+  return { data: [] }
 }

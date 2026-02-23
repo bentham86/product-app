@@ -8,6 +8,31 @@ API REST para gestión de productos (CRUD con búsqueda, filtrado y paginación)
 - PostgreSQL
 - Docker & Docker Compose
 
+## Diagrama de arquitectura (alto nivel)
+
+```
+                    ┌─────────────────────────────────────────────────────────┐
+                    │                     product-backend                      │
+                    │                                                          │
+  Cliente            │   ┌──────────────┐     ┌─────────────┐                 │
+  (Frontend /        │   │   Puma       │     │ Interactors │                 │
+  curl / Swagger) ───┼──►│   Rails      │────►│ (Create,    │                 │
+                    │   │   API         │     │  Update,     │                 │
+                    │   │   Controllers │     │  Destroy)    │                 │
+                    │   └──────┬───────┘     └──────┬───────┘                 │
+                    │          │                    │                          │
+                    │          │                    ▼                          │
+                    │   ┌──────▼───────┐     ┌─────────────┐     ┌──────────┐ │
+                    │   │  Blueprints  │     │   Model     │────►│ Postgres │ │
+                    │   │ (Product,    │◄────│   Product   │     │   DB     │ │
+                    │   │  Audit)      │     │   + audited │     └──────────┘ │
+                    │   └──────────────┘     └─────────────┘                  │
+                    │                                                          │
+                    └─────────────────────────────────────────────────────────┘
+```
+
+**Flujo:** Las peticiones HTTP llegan a los controladores (`api/v1/products`). Las operaciones de escritura delegan en Interactors; los modelos (Product, audits) persisten en PostgreSQL. Las respuestas JSON se generan con Blueprints. En producción (Railway) la API escucha en el `PORT` inyectado; opcionalmente se sirve con Docker (ver `docs/deploy-railway.md`).
+
 ## Guía de configuración (Docker) — pasos de la Spec
 
 1. **Requisitos:** Docker y Docker Compose instalados.
