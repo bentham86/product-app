@@ -11,6 +11,15 @@ Repositorio del proyecto **product-app**: aplicación de gestión de productos (
 
 Juntos forman un flujo completo: el frontend llama al backend en `/api/v1/products`; la documentación de la API está en el backend y las especificaciones de diseño en `docs/` (SDD backend, frontend y API).
 
+## Backend en producción (Railway)
+
+| Recurso | URL |
+| -------- | -------- |
+| **API base** | https://product-app-production-e218.up.railway.app |
+| **Documentación (Swagger UI)** | https://product-app-production-e218.up.railway.app/api-docs |
+
+Puedes probar los endpoints desde Swagger o con `curl` contra la API base (p. ej. `GET /api/v1/products`).
+
 ## CI/CD
 
 En cada **push** y **pull request** a `main` se ejecuta un pipeline en GitHub Actions (`.github/workflows/ci.yml`):
