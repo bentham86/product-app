@@ -11,14 +11,15 @@ Repositorio del proyecto **product-app**: aplicación de gestión de productos (
 
 Juntos forman un flujo completo: el frontend llama al backend en `/api/v1/products`; la documentación de la API está en el backend y las especificaciones de diseño en `docs/` (SDD backend, frontend y API).
 
-## Backend en producción (Railway)
+## Enlaces en producción
 
 | Recurso | URL |
 | -------- | -------- |
-| **API base** | https://product-app-production-e218.up.railway.app |
-| **Documentación (Swagger UI)** | https://product-app-production-e218.up.railway.app/api-docs |
+| **Frontend (Vercel)** | https://product-app-five-sigma.vercel.app/ |
+| **Backend API base (Railway)** | https://product-app-production-e218.up.railway.app |
+| **Documentación API (Swagger UI)** | https://product-app-production-e218.up.railway.app/api-docs |
 
-Puedes probar los endpoints desde Swagger o con `curl` contra la API base (p. ej. `GET /api/v1/products`).
+Puedes usar el frontend para gestionar el catálogo; los endpoints se pueden probar desde Swagger o con `curl` (p. ej. `GET /api/v1/products`).
 
 ## CI/CD
 

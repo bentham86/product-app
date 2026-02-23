@@ -91,6 +91,12 @@ Opcional: pasar `--build-arg NEXT_PUBLIC_API_BASE_URL=...` en el build si se pre
 
 Conectar el repo en [Vercel](https://vercel.com) y configurar las variables de entorno en el dashboard. Build: `next build`; las variables `NEXT_PUBLIC_*` se inyectan en build time.
 
+Ver la guía **[docs/deploy-vercel.md](docs/deploy-vercel.md)**. En resumen:
+
+- **Root Directory** (monorepo): `product-frontend`
+- **Variable obligatoria en producción:**  
+  `NEXT_PUBLIC_API_BASE_URL=https://product-app-production-e218.up.railway.app` (sin `/` final)
+
 ## Estructura relevante
 
 - `app/` — layout, page, providers (QueryClient + Toaster)
