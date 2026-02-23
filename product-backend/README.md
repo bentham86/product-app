@@ -71,6 +71,10 @@ Los cambios en productos (create, update, soft delete) se registran con la gema 
 - `app/controllers/api/v1/products_controller.rb`
 - `config/routes.rb` — namespace api/v1
 
+## Despliegue en Railway
+
+Para publicar el backend en **Railway** (con PostgreSQL): **`docs/deploy-railway.md`**. Pasos: conectar el repo desde GitHub, configurar Root Directory si es monorepo (`product-backend`), añadir PostgreSQL, variables (`RAILS_MASTER_KEY`, `DATABASE_URL`), Custom Start Command (`db:prepare` + Puma) y generar dominio. Incluye también opción por CLI.
+
 ## Sin Docker (local)
 
 Si tienes PostgreSQL en local, crea las bases y ejecuta migraciones:
